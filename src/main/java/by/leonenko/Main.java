@@ -11,8 +11,8 @@ import java.io.IOException;
 import java.time.LocalDate;
 import java.time.Period;
 import java.util.*;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
+import java.util.regex.Pattern;
+
 
 public class Main {
     public static void main(String[] args) throws IOException {
@@ -28,17 +28,11 @@ public class Main {
         //task10();
         //task11();
         //task12();
-        task13();
-        //task14();
+        //task13();
+        task14();
         //task15();
     }
 
-    /**
-     * Задача №1 -
-     * Из представленных животных отобрать все молодые особи от 10 до 20 лет и отсортировать по возрасту (по возрастанию)
-     * далее - распределить по 7 на каждый зоопарк. Зоопарков неограниченное кол-во а вы - директор 3-го по счёту зоопарка.
-     * Полученных животных вывести в консоль.
-     */
     private static void task1() throws IOException {
         List<Animal> animals = Util.getAnimals();
         int lowerBorderAge = 10;
@@ -51,12 +45,6 @@ public class Main {
                 .skip((numberMyZoo - 1) * capacityZoo).limit(capacityZoo).forEach(System.out::println);
     }
 
-
-    /**
-     * Задача №2 -
-     * Отобрать всех животных из Японии (Japanese) и записать породу UPPER_CASE в если пол Female
-     * преобразовать к строкам породы животных и вывести в консоль
-     */
     private static void task2() throws IOException {
         List<Animal> animals = Util.getAnimals();
         String country = "Japanese";
@@ -69,10 +57,6 @@ public class Main {
                 .forEach(System.out::println);
     }
 
-    /**
-     * Задача №3 -
-     * Отобрать всех животных старше 30 лет и вывести все страны происхождения без дубликатов начинающиеся на "A"
-     */
     private static void task3() throws IOException {
         List<Animal> animals = Util.getAnimals();
         int age = 30;
@@ -85,10 +69,6 @@ public class Main {
                 .forEach(System.out::println);
     }
 
-    /**
-     * Задача №4 -
-     * Подсчитать количество всех животных пола = Female. Вывести в консоль
-     */
     private static void task4() throws IOException {
         List<Animal> animals = Util.getAnimals();
         String gender = "Female";
@@ -98,11 +78,6 @@ public class Main {
         System.out.println(count);
     }
 
-    /**
-     * Задача №5 -
-     * Взять всех животных возрастом 20 - 30 лет. Есть ли среди нах хоть один из страны Венгрия (Hungarian)?
-     * Ответ вывести в консоль
-     */
     private static void task5() throws IOException {
         List<Animal> animals = Util.getAnimals();
         int lowerBorderAge = 20;
@@ -114,11 +89,6 @@ public class Main {
         System.out.println(result);
     }
 
-    /**
-     * Задача №6 -
-     * Взять всех животных. Все ли они пола Male и Female ?
-     * Ответ вывести в консоль
-     */
     private static void task6() throws IOException {
         List<Animal> animals = Util.getAnimals();
         String genderFemale = "Female";
@@ -128,11 +98,6 @@ public class Main {
         System.out.println(result);
     }
 
-    /**
-     * Задача №7 -
-     * Взять всех животных. Узнать что ни одно из них не имеет страну происхождения Oceania.
-     * Ответ вывести в консоль
-     */
     private static void task7() throws IOException {
         List<Animal> animals = Util.getAnimals();
         String country = "Oceania";
@@ -141,11 +106,6 @@ public class Main {
         System.out.println(result);
     }
 
-    /**
-     * Задача №8 -
-     * Взять всех животных. Отсортировать их породу в стандартном порядке и взять первые 100.
-     * Вывести в консоль возраст самого старого животного
-     */
     private static void task8() throws IOException {
         List<Animal> animals = Util.getAnimals();
         int quantity = 100;
@@ -156,11 +116,6 @@ public class Main {
         System.out.println(age);
     }
 
-    /**
-     * Задача №9 -
-     * Взять всех животных. Преобразовать их в породы, а породы в []char
-     * Вывести в консоль длину самого короткого массива
-     */
     private static void task9() throws IOException {
         List<Animal> animals = Util.getAnimals();
         int length = animals.stream()
@@ -171,20 +126,12 @@ public class Main {
         System.out.println(length);
     }
 
-    /**
-     * Задача №10 -
-     * Взять всех животных. Подсчитать суммарный возраст всех животных. Вывести результат в консоль
-     */
     private static void task10() throws IOException {
         List<Animal> animals = Util.getAnimals();
         int totalAge = animals.stream().mapToInt(Animal::getAge).sum();
         System.out.println(totalAge);
     }
 
-    /**
-     * Задача №11 -
-     * Взять всех животных. Подсчитать средний возраст всех животных из индонезии (Indonesian). Вывести результат в консоль
-     */
     private static void task11() throws IOException {
         List<Animal> animals = Util.getAnimals();
         String country = "Indonesian";
@@ -194,13 +141,6 @@ public class Main {
         System.out.println(average);
     }
 
-    /**
-     * Задача №12 -
-     * Во Французский легион принимают людей со всего света, но есть отбор по полу (только мужчины)
-     * возраст от 18 до 27 лет. Преимущество отдаётся людям военной категории 1, на втором месте - военная категория 2,
-     * и на третьем месте военная категория 3. Отсортировать всех подходящих кандидатов в порядке их
-     * приоритета по военной категории. Однако взять на обучение академия может только 200 человек. Вывести их в консоль.
-     */
     private static void task12() throws IOException {
         List<Person> people = Util.getPersons();
         int lowerAge = 18;
@@ -216,13 +156,6 @@ public class Main {
                 .limit(limit).forEach(System.out::println);
     }
 
-
-    /**
-     * Задача №13 -
-     * Надвигается цунами и в районе эвакуации требуется в первую очередь обойти дома и эвакуировать больных и раненых (из Hospital),
-     * во вторую очередь детей и стариков (до 18 и пенсионного возраста) а после всех остальных. В первый этап эвакуации мест
-     * в эвакуационном транспорте только 500. Вывести всех людей попадающих в первый этап эвакуации в порядке приоритета (в консоль).
-     */
     private static void task13() throws IOException {
         List<House> houses = Util.getHouses();
         String buildingType = "Hospital";
@@ -242,42 +175,35 @@ public class Main {
                                         (genderFemale.equals(person.getGender()) &&
                                                 Period.between(person.getDateOfBirth(), currentDate).getYears() >= retirementAgeFemale) ? 2 : 3), person)))
                 .sorted(Map.Entry.comparingByKey())
-                .map(o -> o.getValue())
+                .map(Map.Entry::getValue)
                 .limit(limit)
                 .forEach(System.out::println);
     }
 
-    /**
-     * Задача №14 -
-     * Из перечня автомобилей приходящих на рынок Азии логистическому агентству предстоит отсортировать их в порядке следования
-     * 1.Туркменистан - 2.Узбекистан - 3.Казахстан - 4.Кыргызстан - 5.Россия - 6.Монголия.
-     * Все автомобили марки "Jaguar" а так же все авто цвета White идут в первую страну.
-     * Из оставшихся все автомобили с массой до 1500 кг и марок BMW, Lexus, Chrysler и Toyota идут во второй эшелон.
-     * Из оставшихся все автомобили Черного цвета с массой более 4000 кг и все GMC и Dodge идут в третий эшелон.
-     * Из оставшихся все автомобили года выпуска до 1982 или все модели "Civic" и "Cherokee" идут в четвёртый эшелон.
-     * Из оставшихся все автомобили цветов НЕ Yellow, Red, Green и Blue или же по стоимости дороже 40000 в пятый эшелон
-     * Из оставшиеся все автомобили в vin номере которых есть цифра "59" идут в последний шестой эшелон.
-     * Оставшиеся автомобили отбрасываем, они никуда не идут.
-     * Измерить суммарные массы автомобилей всех эшелонов для каждой из стран и подсчитать сколько для каждой страны
-     * будет стоить транспортные расходы если учесть что на 1 тонну транспорта будет потрачено 7.14 $.
-     * Вывести суммарные стоимости в консоль. Вывести общую выручку логистической кампании.
-     */
+
     private static void task14() throws IOException {
         List<Car> cars = Util.getCars();
-        //        Продолжить...
+
     }
 
-    /**
-     * Задача №15 -
-     * Для оранжереи нужно подобрать растения соответствующие требованиям.
-     * Во-первых, нужно произвести сложную сортировку каталога растений. Отсортировать их по странам происхождения в обратном порядке
-     * После по стоимости и еще по водопотреблению в обратном порядке. Из этого списка взять растения название которых
-     * от буквы "S" до буквы "C". Если растения тенелюбивые и им подходит горшок из стекла, алюминия или стали - то выбираем их.
-     * Далее на каждое растение надо рассчитать стоимость растения + стоимость потребления воды за 5 лет c учётом того
-     * что кубометр воды стоит 1.39 $. Суммировать общую стоимость обслуживания всех растений. Во сколько это обойдётся бюджету?
-     */
     private static void task15() throws IOException {
         List<Flower> flowers = Util.getFlowers();
-        //        Продолжить...
+        Set<String> materials = Set.of("Aluminum", "Glass", "Steel");
+        String filterPattern = "[C-S]";
+        int numberDaysInFiveYears = 1826;
+        double costWater = 1.39;
+        int literVsCube = 1000;
+        int total = flowers.stream()
+                .sorted(Comparator.comparing(Flower::getOrigin).reversed().thenComparing(Flower::getPrice).reversed()
+                        .thenComparing(Flower::getWaterConsumptionPerDay))
+                .filter(flower -> Pattern.compile(filterPattern)
+                        .matcher(String.valueOf(flower.getCommonName().charAt(0))).matches())
+                .filter(Flower::isShadePreferred)
+                .filter(flower -> flower.getFlowerVaseMaterial().stream().anyMatch(materials::contains))
+                .reduce(0.0, (cost, flower) -> {
+                    return cost + flower.getPrice() +
+                            (flower.getWaterConsumptionPerDay() / literVsCube * numberDaysInFiveYears * costWater);
+                }, Double::sum).intValue();
+        System.out.println(total);
     }
 }

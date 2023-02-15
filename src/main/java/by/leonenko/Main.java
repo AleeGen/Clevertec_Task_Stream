@@ -185,35 +185,49 @@ public class Main {
                 .forEach(System.out::println);
     }
 
+
+    /**
+     * "Измерить суммарные массы автомобилей всех эшелонов для каждой из стран и подсчитать сколько для каждой страны
+     * будет стоить транспортные расходы если учесть что на 1 тонну транспорта будет потрачено 7.14 $.
+     * Вывести суммарные стоимости в консоль. Вывести общую выручку логистической кампании." - я это понял так:
+     * перед въездом на таможне компания платит за все авто, находящиеся на условном позде, то есть для 1-ой
+     * страны = 1000 авто, для 2-ой страны = 1000 - те, который выгрузили в 1-ой стране и т.д. А общая выручка =
+     * прибыль от выгруженных авто - сумма расходов во всех странах.
+     */
     private static void task14() throws IOException {
         List<Car> cars = Util.getCars();
         Set<String> filter2 = Set.of("BMW", "Lexus", "Chrysler", "Toyota");
         Set<String> filter3 = Set.of("GMC", "Dodge");
         Set<String> filter4 = Set.of("Civic", "Cherokee");
         Set<String> filter5 = Set.of("Yellow", "Red", "Green", "Blue");
-        AtomicInteger revenue = new AtomicInteger();
+        AtomicInteger netProfit = new AtomicInteger();
         Stream.of(cars)
-                .map(o -> goToCountry(o, car -> "Jaguar".equals(car.getCarMake()) || "White".equals(car.getColor()), revenue))
-                .map(o -> goToCountry(o, car -> car.getMass() < 1500 && filter2.contains(car.getCarMake()), revenue))
+                .map(o -> goToCountry(o, car -> "Jaguar".equals(car.getCarMake()) || "White".equals(car.getColor()), netProfit))
+                .map(o -> goToCountry(o, car -> car.getMass() < 1500 && filter2.contains(car.getCarMake()), netProfit))
                 .map(o -> goToCountry(o, car -> (car.getMass() > 4000 && "Black".equals(car.getColor())) ||
-                        filter3.contains(car.getCarMake()), revenue))
-                .map(o -> goToCountry(o, car -> car.getReleaseYear() < 1982 || filter4.contains(car.getCarMake()), revenue))
-                .map(o -> goToCountry(o, car -> !filter5.contains(car.getColor()) || car.getPrice() > 40000, revenue))
-                .map(o -> goToCountry(o, car -> car.getVin().contains("59"), revenue)).anyMatch(o -> true);
-        System.out.println("Выручка компании: " + revenue);
+                        filter3.contains(car.getCarMake()), netProfit))
+                .map(o -> goToCountry(o, car -> car.getReleaseYear() < 1982 || filter4.contains(car.getCarMake()), netProfit))
+                .map(o -> goToCountry(o, car -> !filter5.contains(car.getColor()) || car.getPrice() > 40000, netProfit))
+                .map(o -> goToCountry(o, car -> car.getVin().contains("59"), netProfit)).anyMatch(o -> true);
+        System.out.println("Чистая прибыль компании: " + netProfit);
     }
 
-    private static List<Car> goToCountry(List<Car> cars, Predicate<Car> predicate, AtomicInteger total) {
+    private static List<Car> goToCountry(List<Car> cars, Predicate<Car> predicate, AtomicInteger netProfit) {
+        AtomicInteger expenses = new AtomicInteger();
         return Stream.of(cars).flatMap(list -> {
-                    int expenses = (int) (list.stream().mapToInt(Car::getMass).sum() / 1000 * 7.14);
-                    System.out.println("Расходы страны: " + expenses);
-                    total.addAndGet(expenses);
+                    expenses.addAndGet((int) (list.stream().mapToInt(Car::getMass).sum() / 1000 * 7.14));
+                    System.out.println("Расходы компании в данной стране: " + expenses);
                     return list.stream();
                 })
                 .collect(Collectors.partitioningBy(predicate))
                 .entrySet().stream()
                 .<List<Car>>mapMulti((entry, consumer) -> {
-                    if (!entry.getKey()) consumer.accept(entry.getValue());
+                    if (!entry.getKey()) {
+                        consumer.accept(entry.getValue());
+                    } else {
+                        netProfit.addAndGet(entry.getValue().stream().mapToInt(Car::getPrice).sum());
+                        netProfit.addAndGet(-expenses.get());
+                    }
                 }).flatMap(Collection::stream).toList();
     }
 

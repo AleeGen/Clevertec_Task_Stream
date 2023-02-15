@@ -8,10 +8,15 @@ import by.leonenko.model.Person;
 import by.leonenko.util.Util;
 
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.Period;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Predicate;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 
 public class Main {
@@ -180,30 +185,54 @@ public class Main {
                 .forEach(System.out::println);
     }
 
-
     private static void task14() throws IOException {
         List<Car> cars = Util.getCars();
+        Set<String> filter2 = Set.of("BMW", "Lexus", "Chrysler", "Toyota");
+        Set<String> filter3 = Set.of("GMC", "Dodge");
+        Set<String> filter4 = Set.of("Civic", "Cherokee");
+        Set<String> filter5 = Set.of("Yellow", "Red", "Green", "Blue");
+        AtomicInteger revenue = new AtomicInteger();
+        Stream.of(cars)
+                .map(o -> goToCountry(o, car -> "Jaguar".equals(car.getCarMake()) || "White".equals(car.getColor()), revenue))
+                .map(o -> goToCountry(o, car -> car.getMass() < 1500 && filter2.contains(car.getCarMake()), revenue))
+                .map(o -> goToCountry(o, car -> (car.getMass() > 4000 && "Black".equals(car.getColor())) ||
+                        filter3.contains(car.getCarMake()), revenue))
+                .map(o -> goToCountry(o, car -> car.getReleaseYear() < 1982 || filter4.contains(car.getCarMake()), revenue))
+                .map(o -> goToCountry(o, car -> !filter5.contains(car.getColor()) || car.getPrice() > 40000, revenue))
+                .map(o -> goToCountry(o, car -> car.getVin().contains("59"), revenue)).anyMatch(o -> true);
+        System.out.println("Выручка компании: " + revenue);
+    }
 
+    private static List<Car> goToCountry(List<Car> cars, Predicate<Car> predicate, AtomicInteger total) {
+        return Stream.of(cars).flatMap(list -> {
+                    int expenses = (int) (list.stream().mapToInt(Car::getMass).sum() / 1000 * 7.14);
+                    System.out.println("Расходы страны: " + expenses);
+                    total.addAndGet(expenses);
+                    return list.stream();
+                })
+                .collect(Collectors.partitioningBy(predicate))
+                .entrySet().stream()
+                .<List<Car>>mapMulti((entry, consumer) -> {
+                    if (!entry.getKey()) consumer.accept(entry.getValue());
+                }).flatMap(Collection::stream).toList();
     }
 
     private static void task15() throws IOException {
         List<Flower> flowers = Util.getFlowers();
         Set<String> materials = Set.of("Aluminum", "Glass", "Steel");
-        String filterPattern = "[C-S]";
+        String filterPattern = "^[C-S].*";
         int numberDaysInFiveYears = 1826;
         double costWater = 1.39;
         int literVsCube = 1000;
         int total = flowers.stream()
                 .sorted(Comparator.comparing(Flower::getOrigin).reversed().thenComparing(Flower::getPrice).reversed()
                         .thenComparing(Flower::getWaterConsumptionPerDay))
-                .filter(flower -> Pattern.compile(filterPattern)
-                        .matcher(String.valueOf(flower.getCommonName().charAt(0))).matches())
+                .filter(f -> Pattern.compile(filterPattern).matcher(f.getCommonName()).matches())
                 .filter(Flower::isShadePreferred)
                 .filter(flower -> flower.getFlowerVaseMaterial().stream().anyMatch(materials::contains))
-                .reduce(0.0, (cost, flower) -> {
-                    return cost + flower.getPrice() +
-                            (flower.getWaterConsumptionPerDay() / literVsCube * numberDaysInFiveYears * costWater);
-                }, Double::sum).intValue();
+                .reduce(BigDecimal.valueOf(0), (cost, flower) -> cost.add(BigDecimal.valueOf(flower.getPrice() +
+                                (flower.getWaterConsumptionPerDay() / literVsCube * numberDaysInFiveYears * costWater))),
+                        BigDecimal::add).intValue();
         System.out.println(total);
     }
 }
